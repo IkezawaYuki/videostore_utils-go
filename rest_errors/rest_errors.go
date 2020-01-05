@@ -36,6 +36,24 @@ func (e restErr) Causes() []interface{} {
 	return e.ErrCauses
 }
 
+func (e *restErr) UnmarshalJSON(data []byte) error {
+	v := &struct {
+		ErrMessage *string        `json:"message"`
+		ErrStatus  *int           `json:"status"`
+		ErrError   *string        `json:"error"`
+		ErrCauses  *[]interface{} `json:"causes"`
+	}{
+		&e.ErrMessage,
+		&e.ErrStatus,
+		&e.ErrError,
+		&e.ErrCauses,
+	}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewRestError(message string, status int, err string, causes []interface{}) RestErr {
 	return restErr{
 		ErrMessage: message,
